@@ -9,6 +9,11 @@ OBJS = $(SRCS:.s=.o)
 
 EXE = lab
 
+ASC_ORDER = 1
+ifdef ASC
+ASC_ORDER = $(ASC)
+endif
+
 all: $(SRCS) $(EXE)
 
 clean:
@@ -18,4 +23,4 @@ $(EXE): $(OBJS)
 	$(LD) $(LDFLAGS) $(OBJS) -o $@
 
 .s.o:
-	$(AS) $(ASFLAGS) $< -o $@
+	$(AS) $(ASFLAGS) -D ASC_ORDER=$(ASC_ORDER) $< -o $@

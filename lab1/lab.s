@@ -4,13 +4,13 @@ section	.data
 res:
 	dq	0
 a:
-	dw	-5
+	dw	34
 b:
-	dw	-6
+	dw	-64
 c:
-	dd	7
+	dd	1
 d:
-	dw	8
+	dw	1
 e:
 	dd	113
 section	.text
@@ -65,7 +65,6 @@ _start:
 
     ; count (a**3 + b**3) / (a**2 * c - b**2 * d + e)
     mov rax, rsi
-    xor rdx, rdx
     cqo
     idiv rdi
 

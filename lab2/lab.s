@@ -1,6 +1,8 @@
 bits	64
 ;	Sorting each diagonal of a square matrix parallel to the side diagonal
 section	.data
+asc:
+    db  ASC_ORDER
 n:
 	dw	4
 matrix:
@@ -21,15 +23,15 @@ _start:
 	xor r9w, r9w					; r9w - index of current row
 	xor r10w, r10w					; r10w - index of current col
 
-	mov cx, r8w						
-	add cx, r8w						
+	mov cx, r8w
+	add cx, r8w
 	sub cx, 1						; cx = n * 2 - 1
 
 ; 1. iterates over rows from 0 to n
 ; 2. iterates over cols from 0 to n
 main_loop:
 	push cx							; save loop counter
-	
+
 	call get_diagonal_length		; cx - length of diagonal
 	mov di, cx						; di - number of rows/cols
 	sub di, 1						; di - r value of comb sort
@@ -64,16 +66,28 @@ comb_sort_loop:
 	mov ax, [matrix + r12*2]
 	mov dx, [matrix + r13*2]
 
-	cmp ax, dx
-	jge next_iter
+    cmp byte[asc], 1
+    je  ascending
+    jmp descending
 
-	; swap l value and r value of comb sort
-	; swap matrix[r9w - shift][r10w + shift] with matrix[r9w - shift - di][r10w + shift + di]
-	mov ax, [matrix + r12*2]
-	mov dx, [matrix + r13*2]
-	mov [matrix + r12*2], dx		; matrix[r9w - shift][r10w + shift] = matrix[r9w - shift - di][r10w + shift + di]
-	mov [matrix + r13*2], ax		; matrix[r9w - shift - di][r10w + shift + di] = matrix[r9w - shift][r10w + shift]
-	
+    ascending:
+	    cmp ax, dx
+	    jge next_iter
+        jmp swap
+
+    descending:
+        cmp ax, dx
+        jle next_iter
+        jmp swap
+
+    swap:
+	    ; swap l value and r value of comb sort
+	    ; swap matrix[r9w - shift][r10w + shift] with matrix[r9w - shift - di][r10w + shift + di]
+	    mov ax, [matrix + r12*2]
+	    mov dx, [matrix + r13*2]
+	    mov [matrix + r12*2], dx		; matrix[r9w - shift][r10w + shift] = matrix[r9w - shift - di][r10w + shift + di]
+	    mov [matrix + r13*2], ax		; matrix[r9w - shift - di][r10w + shift + di] = matrix[r9w - shift][r10w + shift]
+
 	next_iter:
 		inc r11w
 		jmp comb_sort_loop
