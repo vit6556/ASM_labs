@@ -68,8 +68,18 @@ main:
             jmp     .next_iter
             
             .not_in_word:
-                cmp     r8, 0
-                jne     .not_first_word
+                cmp     r8, 0                       ; Check if first line
+                je      .update_first_word_char
+                cmp     r10, 1                      ; Check if new line
+                je      .print_new_line
+                jmp     .not_first_word
+
+                .print_new_line:
+                push    rdi
+                mov     rdi, new_line
+                call    print_char
+                mov     r10, 0                      ; Set new line delimiter false
+                pop     rdi
 
                 .update_first_word_char:
                 mov     r8, [rdi]
@@ -85,23 +95,12 @@ main:
                         mov     r9, 2               ; Set status in_word_to_delete
                         jmp     .next_iter
 
-                   .set_word_to_print:
+                    .set_word_to_print:
                         mov     r9, 1               ; Set status in_word_to_print
 
                         ; Print delimiter
                         push    rdi
-                        cmp     r10, 0              ; Check if delimiter is \n
-                        je      .print_space
-                        jmp     .print_new_line
-
-                        .print_space:
                         mov     rdi, space
-                        jmp     .print_delimiter
-                        .print_new_line:
-                        mov     rdi, new_line
-                        mov     r10, 0              ; Set new line delimiter false
-
-                        .print_delimiter:
                         call    print_char
                         pop     rdi
 
@@ -118,7 +117,7 @@ main:
 
 	.end:
     ; Print \n
-    cmp     r10, 1                                  ; check if already new line
+    cmp     r10, 1                                  ; Check if already new line
     jne     .print_one_new_line
     mov     rdi, new_line
     call    print_char
@@ -139,21 +138,21 @@ check_if_delimiter:
     ; Result (0 or 1) in eax
     mov     rax, 0
 
-    cmp     byte [rdi], 0x20                        ; check if space
+    cmp     byte [rdi], 0x20                        ; Check if space
     je      .is_delimiter
-    cmp     byte [rdi], 0x09                        ; check if tab
+    cmp     byte [rdi], 0x09                        ; Check if tab
     je      .is_delimiter
-    cmp     byte [rdi], 0x0a                        ; check if \n
+    cmp     byte [rdi], 0x0a                        ; Check if \n
     je      .is_new_line
     jmp     .end
 
     .is_new_line:
-    cmp     r8, 0                                   ; check if before first word
+    cmp     r8, 0                                   ; Check if before first word
     je     .print_new_line
-    cmp     r10, 1                                  ; check if already new line
+    cmp     r10, 1                                  ; Check if already new line
     je     .print_new_line
 
-    mov     r10, 1                                  ; set new line delimiter true
+    mov     r10, 1                                  ; Set new line delimiter true
     jmp     .is_delimiter
 
     .print_new_line:
@@ -218,5 +217,3 @@ exit_normal:
 exit:
     mov     rax, 60                                 ; Syscall for exit
 	syscall
-
-
